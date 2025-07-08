@@ -12,7 +12,7 @@ const MarketsList = ({ markets, selectedMarket, onMarketSelect }) => {
                             key={market.id}
                             market={market}
                             isSelected={selectedMarket?.id === market.id}
-                            onSelect={() => onMarketSelect(market)}
+                            onSelect={onMarketSelect}
                         />
                     ))}
                 </div>

@@ -4,6 +4,7 @@ import StatsCard from './StatsCard';
 import { formatCurrency, formatAPY } from '../utils/formatters';
 
 const StatsOverview = ({ markets }) => {
+    const totalMarkets = markets.length;
     const avgAPY = markets.reduce((sum, m) => sum + m.currentAPY, 0) / markets.length;
     const totalTVL = markets.reduce((sum, m) => sum + m.tvl, 0);
 
@@ -11,16 +12,18 @@ const StatsOverview = ({ markets }) => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <StatsCard
                 title="Total Markets"
-                value={markets.length}
+                value={totalMarkets}
                 icon={Activity}
                 iconColor="bg-indigo-100 text-indigo-600"
             />
+
             <StatsCard
                 title="Avg APY"
                 value={formatAPY(avgAPY)}
                 icon={TrendingUp}
                 iconColor="bg-green-100 text-green-600"
             />
+
             <StatsCard
                 title="Total TVL"
                 value={formatCurrency(totalTVL)}

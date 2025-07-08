@@ -1,100 +1,127 @@
+// src/hooks/useMarkets.js
 import { useState, useEffect } from 'react';
+import pendleApi from '../services/pendleApi';
 
-const useMarkets = () => {
+export const useMarkets = (chainId = 8453) => { // Default to Base chain
     const [markets, setMarkets] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [selectedMarket, setSelectedMarket] = useState(null);
+    const [error, setError] = useState(null);
 
-    // Mock data for demonstration (replace with actual API calls)
-    const mockMarkets = [
-        {
-            id: '1',
-            name: 'stETH-PT',
-            symbol: 'stETH',
-            chain: 'ethereum',
-            currentAPY: 5.2,
-            tvl: 1250000,
-            maturity: '2024-12-31',
-            historicalData: [
-                { date: '2024-07-01', apy: 4.8, timestamp: Date.now() - 7 * 24 * 60 * 60 * 1000 },
-                { date: '2024-07-02', apy: 4.9, timestamp: Date.now() - 6 * 24 * 60 * 60 * 1000 },
-                { date: '2024-07-03', apy: 5.1, timestamp: Date.now() - 5 * 24 * 60 * 60 * 1000 },
-                { date: '2024-07-04', apy: 5.0, timestamp: Date.now() - 4 * 24 * 60 * 60 * 1000 },
-                { date: '2024-07-05', apy: 5.3, timestamp: Date.now() - 3 * 24 * 60 * 60 * 1000 },
-                { date: '2024-07-06', apy: 5.2, timestamp: Date.now() - 2 * 24 * 60 * 60 * 1000 },
-                { date: '2024-07-07', apy: 5.2, timestamp: Date.now() - 1 * 24 * 60 * 60 * 1000 },
-                { date: '2024-07-08', apy: 5.2, timestamp: Date.now() }
-            ]
-        },
-        {
-            id: '2',
-            name: 'sDAI-PT',
-            symbol: 'sDAI',
-            chain: 'ethereum',
-            currentAPY: 3.8,
-            tvl: 890000,
-            maturity: '2024-11-30',
-            historicalData: [
-                { date: '2024-07-01', apy: 3.5, timestamp: Date.now() - 7 * 24 * 60 * 60 * 1000 },
-                { date: '2024-07-02', apy: 3.6, timestamp: Date.now() - 6 * 24 * 60 * 60 * 1000 },
-                { date: '2024-07-03', apy: 3.7, timestamp: Date.now() - 5 * 24 * 60 * 60 * 1000 },
-                { date: '2024-07-04', apy: 3.8, timestamp: Date.now() - 4 * 24 * 60 * 60 * 1000 },
-                { date: '2024-07-05', apy: 3.9, timestamp: Date.now() - 3 * 24 * 60 * 60 * 1000 },
-                { date: '2024-07-06', apy: 3.8, timestamp: Date.now() - 2 * 24 * 60 * 60 * 1000 },
-                { date: '2024-07-07', apy: 3.8, timestamp: Date.now() - 1 * 24 * 60 * 60 * 1000 },
-                { date: '2024-07-08', apy: 3.8, timestamp: Date.now() }
-            ]
-        },
-        {
-            id: '3',
-            name: 'ezETH-PT',
-            symbol: 'ezETH',
-            chain: 'base',
-            currentAPY: 6.1,
-            tvl: 2100000,
-            maturity: '2025-01-31',
-            historicalData: [
-                { date: '2024-07-01', apy: 5.8, timestamp: Date.now() - 7 * 24 * 60 * 60 * 1000 },
-                { date: '2024-07-02', apy: 5.9, timestamp: Date.now() - 6 * 24 * 60 * 60 * 1000 },
-                { date: '2024-07-03', apy: 6.0, timestamp: Date.now() - 5 * 24 * 60 * 60 * 1000 },
-                { date: '2024-07-04', apy: 6.2, timestamp: Date.now() - 4 * 24 * 60 * 60 * 1000 },
-                { date: '2024-07-05', apy: 6.3, timestamp: Date.now() - 3 * 24 * 60 * 60 * 1000 },
-                { date: '2024-07-06', apy: 6.1, timestamp: Date.now() - 2 * 24 * 60 * 60 * 1000 },
-                { date: '2024-07-07', apy: 6.0, timestamp: Date.now() - 1 * 24 * 60 * 60 * 1000 },
-                { date: '2024-07-08', apy: 6.1, timestamp: Date.now() }
-            ]
-        }
-    ];
+    const fetchMarkets = async () => {
+        setLoading(true);
+        setError(null);
 
-    useEffect(() => {
-        // Simulate API call
-        const fetchMarkets = async () => {
-            setLoading(true);
-            try {
-                // Replace this with actual Pendle API call
-                // const response = await fetch('https://api.pendle.finance/v1/markets');
-                // const data = await response.json();
+        try {
+            // Get all markets for the specified chain
+            const rawMarkets = await pendleApi.getMarkets(chainId);
 
-                setTimeout(() => {
-                    setMarkets(mockMarkets);
-                    setSelectedMarket(mockMarkets[0]);
-                    setLoading(false);
-                }, 1000);
-            } catch (error) {
-                console.error('Error fetching markets:', error);
-                setLoading(false);
+            if (!Array.isArray(rawMarkets)) {
+                throw new Error('Invalid response format');
             }
-        };
 
+            // Process first 10 markets to avoid overwhelming the API
+            const marketPromises = rawMarkets.slice(0, 10).map(async (market) => {
+                try {
+                    // Get historical data for each market
+                    const historicalData = await pendleApi.getHistoricalApy(chainId, market.address, 7);
+
+                    // Format the market data
+                    const formattedMarket = pendleApi.formatMarketData(market, chainId, historicalData);
+
+                    // If no historical data from API, generate mock data
+                    if (formattedMarket.historicalData.length === 0) {
+                        formattedMarket.historicalData = pendleApi.generateMockHistoricalData(formattedMarket.currentAPY);
+                    }
+
+                    return formattedMarket;
+                } catch (marketError) {
+                    console.error(`Error processing market ${market.address}:`, marketError);
+                    // Return basic market info if detailed processing fails
+                    return {
+                        id: market.address,
+                        name: market.name || 'Unknown Market',
+                        symbol: market.pt?.symbol || 'Unknown',
+                        chain: pendleApi.getChainName(chainId),
+                        address: market.address,
+                        currentAPY: market.impliedApy || 0,
+                        tvl: market.totalActiveSupply || 0,
+                        maturity: market.expiry ? new Date(market.expiry * 1000).toISOString().split('T')[0] : null,
+                        historicalData: pendleApi.generateMockHistoricalData(market.impliedApy || 5),
+                        liquidity: market.totalLiquidity || 0,
+                        volume24h: market.volume24h || 0
+                    };
+                }
+            });
+
+            const processedMarkets = await Promise.all(marketPromises);
+            const validMarkets = processedMarkets.filter(market => market !== null);
+
+            setMarkets(validMarkets);
+
+        } catch (err) {
+            console.error('Error fetching markets:', err);
+            setError(err.message || 'Failed to fetch markets');
+
+            // Fallback to mock data if API completely fails
+            const mockMarkets = [
+                {
+                    id: 'mock-1',
+                    name: 'stETH-PT',
+                    symbol: 'stETH',
+                    chain: 'base',
+                    currentAPY: 5.2,
+                    tvl: 1250000,
+                    maturity: '2024-12-31',
+                    historicalData: pendleApi.generateMockHistoricalData(5.2),
+                    liquidity: 500000,
+                    volume24h: 25000
+                },
+                {
+                    id: 'mock-2',
+                    name: 'ezETH-PT',
+                    symbol: 'ezETH',
+                    chain: 'base',
+                    currentAPY: 6.1,
+                    tvl: 2100000,
+                    maturity: '2025-01-31',
+                    historicalData: pendleApi.generateMockHistoricalData(6.1),
+                    liquidity: 800000,
+                    volume24h: 45000
+                },
+                {
+                    id: 'mock-3',
+                    name: 'sDAI-PT',
+                    symbol: 'sDAI',
+                    chain: 'base',
+                    currentAPY: 3.8,
+                    tvl: 890000,
+                    maturity: '2024-11-30',
+                    historicalData: pendleApi.generateMockHistoricalData(3.8),
+                    liquidity: 300000,
+                    volume24h: 15000
+                }
+            ];
+            setMarkets(mockMarkets);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Refresh markets data
+    const refreshMarkets = async () => {
+        await fetchMarkets();
+    };
+
+    // Fetch markets on mount or when chainId changes
+    useEffect(() => {
         fetchMarkets();
-    }, []);
+    }, [chainId]);
 
     return {
         markets,
         loading,
-        selectedMarket,
-        setSelectedMarket
+        error,
+        refreshMarkets,
+        chainId
     };
 };
-
-export default useMarkets;

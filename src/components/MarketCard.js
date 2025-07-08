@@ -8,7 +8,7 @@ const MarketCard = ({ market, isSelected, onSelect }) => {
                 ? 'bg-indigo-50 border-2 border-indigo-200 shadow-md'
                 : 'bg-gray-50 border-2 border-transparent hover:bg-gray-100'
                 }`}
-            onClick={onSelect}
+            onClick={() => onSelect(market)}
         >
             <div className="flex items-center justify-between mb-2">
                 <h3 className="font-semibold text-gray-900">{market.name}</h3>
