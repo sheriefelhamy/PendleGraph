@@ -1,70 +1,178 @@
-# Getting Started with Create React App
+# Pendle Markets Dashboard - API Integration Guide
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Overview
+This guide will help you integrate the real Pendle API into your React dashboard. The implementation includes robust error handling, fallback data, and a clean architecture.
 
-## Available Scripts
+## Files to Update
 
-In the project directory, you can run:
+### 1. Create the API Service
+Create a new file: `src/services/pendleApi.js`
+This file contains the main API service class that handles all Pendle API interactions.
 
-### `npm start`
+### 2. Update useMarkets Hook
+Replace your existing `src/hooks/useMarkets.js` with the enhanced version that uses the API service.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 3. Update Components
+- Replace `src/components/APYChart.js` with the enhanced version
+- Replace `src/components/PendleMarketsDashboard.js` with the enhanced version
+- Update `src/utils/formatters.js` with additional formatting utilities
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Installation Steps
 
-### `npm test`
+### Step 1: Install Dependencies
+Your current `package.json` already has the required dependencies. No additional packages needed.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Step 2: Add the API Service
+Create the `src/services/` directory and add the `pendleApi.js` file.
 
-### `npm run build`
+### Step 3: Update Your Files
+Replace the existing files with the enhanced versions provided above.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## API Endpoints Used
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+The implementation uses the following Pendle API endpoints:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- **Markets List**: `GET /v1/{chainId}/markets/all`
+- **Market Details**: `GET /v1/{chainId}/markets/{marketAddress}`
+- **Historical APY**: `GET /v1/{chainId}/markets/{marketAddress}/historical-apy`
 
-### `npm run eject`
+## Features Added
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### 1. Real API Integration
+- Connects to `https://api-v2.pendle.finance/core`
+- Fetches live market data from Base chain (Chain ID: 8453)
+- Includes error handling and timeout protection
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### 2. Fallback System
+- Falls back to mock data if API is unavailable
+- Graceful degradation with user notifications
+- Maintains functionality even during API outages
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### 3. Enhanced UI
+- Loading states with progress indicators
+- Error notifications with retry options
+- Connection status indicators
+- Refresh functionality
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### 4. Data Processing
+- Formats market data consistently
+- Handles missing or invalid data gracefully
+- Generates mock historical data when needed
 
-## Learn More
+## Configuration Options
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Chain Selection
+By default, the app uses Base chain (Chain ID: 8453). To change this:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```javascript
+// In PendleMarketsDashboard.js
+const { markets, loading, error } = useMarkets(1); // For Ethereum
+const { markets, loading, error } = useMarkets(42161); // For Arbitrum
+```
 
-### Code Splitting
+### API Timeout
+The default timeout is 10 seconds. To change:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```javascript
+// In pendleApi.js constructor
+this.timeout = 15000; // 15 seconds
+```
 
-### Analyzing the Bundle Size
+## Error Handling
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+The implementation includes comprehensive error handling:
 
-### Making a Progressive Web App
+1. **Network Errors**: Timeout and connection failures
+2. **API Errors**: Invalid responses or server errors
+3. **Data Validation**: Missing or malformed data
+4. **Fallback Logic**: Graceful degradation to mock data
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## Testing the Integration
 
-### Advanced Configuration
+### 1. Check API Connection
+Open browser DevTools and look for:
+- Network requests to `api-v2.pendle.finance`
+- Console logs showing API responses
+- Status indicator showing "Connected to Pendle API"
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### 2. Test Error Handling
+- Disconnect your internet to test offline mode
+- Check that fallback data loads correctly
+- Verify error messages display properly
 
-### Deployment
+### 3. Verify Data Display
+- Markets should load with real data
+- APY charts should show actual historical data
+- TVL and other metrics should be accurate
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## Deployment to Vercel
 
-### `npm run build` fails to minify
+### 1. Environment Variables
+No environment variables needed for this implementation.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### 2. Build Configuration
+The app should build normally with:
+```bash
+npm run build
+```
+
+### 3. Vercel Deployment
+1. Connect your GitHub repository to Vercel
+2. Configure build settings:
+   - Build Command: `npm run build`
+   - Output Directory: `build`
+   - Node.js Version: 18.x
+
+## Monitoring and Maintenance
+
+### 1. API Rate Limits
+The current implementation:
+- Limits to 10 markets per load
+- Includes request spacing
+- Has timeout protection
+
+### 2. Performance Optimization
+- Markets are cached during the session
+- Historical data is fetched only when needed
+- Minimal API calls on refresh
+
+### 3. Future Enhancements
+- Add more chains (Ethereum, Arbitrum)
+- Implement WebSocket for real-time updates
+- Add market filtering and sorting
+- Include more detailed analytics
+
+## Troubleshooting
+
+### Common Issues
+
+1. **CORS Errors**: Pendle API should support CORS for browser requests
+2. **API Timeouts**: Increase timeout or implement retry logic
+3. **Missing Data**: Fallback system should handle this automatically
+4. **Build Errors**: Ensure all imports are correct
+
+### Debug Mode
+To enable debug logging:
+
+```javascript
+// In pendleApi.js
+console.log('API Response:', response);
+```
+
+## Support
+
+If you encounter issues:
+
+1. Check the browser console for error messages
+2. Verify network connectivity
+3. Test with mock data first
+4. Check Pendle API documentation for updates
+
+## Next Steps
+
+1. Deploy to Vercel and test in production
+2. Monitor API performance and errors
+3. Add additional features based on user feedback
+4. Consider adding more chains and markets
+
+The implementation is production-ready and includes all necessary error handling and fallback mechanisms for a robust user experience.
