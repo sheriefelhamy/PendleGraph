@@ -1,178 +1,181 @@
-# Pendle Markets Dashboard - API Integration Guide
+# Pendle APY Tracker
 
-## Overview
-This guide will help you integrate the real Pendle API into your React dashboard. The implementation includes robust error handling, fallback data, and a clean architecture.
+A comprehensive dashboard for tracking APY (Annual Percentage Yield) trends across all active markets on the Pendle Finance protocol. Monitor real-time yields, historical performance, and market metrics across multiple blockchain networks.
 
-## Files to Update
+## 🚀 Features
 
-### 1. Create the API Service
-Create a new file: `src/services/pendleApi.js`
-This file contains the main API service class that handles all Pendle API interactions.
+- **Real-time APY tracking** across all active Pendle markets
+- **Multi-chain support** (Base, Ethereum, Arbitrum, BNB Chain)
+- **Interactive charts** showing APY trends over time
+- **Market metrics** including TVL, maturity dates, and yield statistics
+- **Responsive design** optimized for desktop and mobile
+- **Live data updates** with refresh functionality
+- **Market comparison** with sortable and filterable views
 
-### 2. Update useMarkets Hook
-Replace your existing `src/hooks/useMarkets.js` with the enhanced version that uses the API service.
+## 📊 Dashboard Components
 
-### 3. Update Components
-- Replace `src/components/APYChart.js` with the enhanced version
-- Replace `src/components/PendleMarketsDashboard.js` with the enhanced version
-- Update `src/utils/formatters.js` with additional formatting utilities
+### Metrics Overview
+- **Total Markets**: Number of active markets across selected chain
+- **Average APY**: Mean yield across all markets
+- **Total TVL**: Combined Total Value Locked across all markets
 
-## Installation Steps
+### Market List
+- Browse all active markets with key metrics
+- Current APY and TVL for each market
+- Click to select and view detailed charts
 
-### Step 1: Install Dependencies
-Your current `package.json` already has the required dependencies. No additional packages needed.
+### Interactive Charts
+- 7-day and 30-day APY trend visualization
+- Real-time trend indicators (up/down arrows)
+- Market-specific maturity and TVL information
 
-### Step 2: Add the API Service
-Create the `src/services/` directory and add the `pendleApi.js` file.
+## 🛠️ Tech Stack
 
-### Step 3: Update Your Files
-Replace the existing files with the enhanced versions provided above.
+- **Frontend**: React 18+ with Hooks
+- **Charts**: Recharts for interactive visualizations
+- **Icons**: Lucide React icon library
+- **Styling**: Tailwind CSS for responsive design
+- **API**: Pendle Finance API v2
 
-## API Endpoints Used
+## 📦 Installation
 
-The implementation uses the following Pendle API endpoints:
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/sheriefelhamy/PendleGraph.git
+   cd PendleGraph
+   ```
 
-- **Markets List**: `GET /v1/{chainId}/markets/all`
-- **Market Details**: `GET /v1/{chainId}/markets/{marketAddress}`
-- **Historical APY**: `GET /v1/{chainId}/markets/{marketAddress}/historical-apy`
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
 
-## Features Added
+3. **Start the development server**
+   ```bash
+   npm start
+   # or
+   yarn start
+   ```
 
-### 1. Real API Integration
-- Connects to `https://api-v2.pendle.finance/core`
-- Fetches live market data from Base chain (Chain ID: 8453)
-- Includes error handling and timeout protection
+4. **Open your browser**
+   Navigate to `http://localhost:3000`
 
-### 2. Fallback System
-- Falls back to mock data if API is unavailable
-- Graceful degradation with user notifications
-- Maintains functionality even during API outages
+## 🏗️ Project Structure
 
-### 3. Enhanced UI
-- Loading states with progress indicators
-- Error notifications with retry options
-- Connection status indicators
-- Refresh functionality
-
-### 4. Data Processing
-- Formats market data consistently
-- Handles missing or invalid data gracefully
-- Generates mock historical data when needed
-
-## Configuration Options
-
-### Chain Selection
-By default, the app uses Base chain (Chain ID: 8453). To change this:
-
-```javascript
-// In PendleMarketsDashboard.js
-const { markets, loading, error } = useMarkets(1); // For Ethereum
-const { markets, loading, error } = useMarkets(42161); // For Arbitrum
+```
+src/
+├── components/
+│   ├── StatusBar.js        # API status and refresh controls
+│   ├── ChainSelector.js    # Blockchain network selector
+│   ├── ErrorAlert.js       # Error handling display
+│   ├── MetricsCards.js     # Dashboard metrics cards
+│   ├── MarketsList.js      # Active markets list
+│   └── Chart.js            # APY trend visualization
+├── utils/
+│   ├── api.js              # Pendle API integration
+│   └── dataUtils.js        # Data processing utilities
+├── PendleAPYTracker.js     # Main application component
+└── index.css               # Global styles
 ```
 
-### API Timeout
-The default timeout is 10 seconds. To change:
+## 🔧 Configuration
 
-```javascript
-// In pendleApi.js constructor
-this.timeout = 15000; // 15 seconds
-```
+### Supported Networks
 
-## Error Handling
+| Network | Chain ID | Description |
+|---------|----------|-------------|
+| Base | 8453 | Base Layer 2 (Default) |
+| Ethereum | 1 | Ethereum Mainnet |
+| Arbitrum | 42161 | Arbitrum One |
+| BNB Chain | 56 | Binance Smart Chain |
 
-The implementation includes comprehensive error handling:
+### Environment Variables
 
-1. **Network Errors**: Timeout and connection failures
-2. **API Errors**: Invalid responses or server errors
-3. **Data Validation**: Missing or malformed data
-4. **Fallback Logic**: Graceful degradation to mock data
+No environment variables required. The app uses public Pendle Finance API endpoints.
 
-## Testing the Integration
+## 🔌 API Integration
 
-### 1. Check API Connection
-Open browser DevTools and look for:
-- Network requests to `api-v2.pendle.finance`
-- Console logs showing API responses
-- Status indicator showing "Connected to Pendle API"
+This application integrates with the Pendle Finance API v2:
 
-### 2. Test Error Handling
-- Disconnect your internet to test offline mode
-- Check that fallback data loads correctly
-- Verify error messages display properly
+- **Markets Endpoint**: `https://api-v2.pendle.finance/core/v1/{chainId}/markets/active`
+- **Market Details**: `https://api-v2.pendle.finance/core/v1/{chainId}/markets/{marketAddress}`
+- **Historical Data**: `https://api-v2.pendle.finance/core/v1/{chainId}/markets/{marketAddress}/historical-data`
 
-### 3. Verify Data Display
-- Markets should load with real data
-- APY charts should show actual historical data
-- TVL and other metrics should be accurate
+## 🎯 Key Features Explained
 
-## Deployment to Vercel
+### Real-time Market Tracking
+- Fetches active markets from Pendle Finance API
+- Enriches market data with TVL, APY, and maturity information
+- Updates data with refresh functionality
 
-### 1. Environment Variables
-No environment variables needed for this implementation.
+### Historical APY Analysis
+- Displays 7-day APY trends by default
+- Shows trend indicators (↗ for up, ↘ for down)
+- Calculates percentage changes between periods
 
-### 2. Build Configuration
-The app should build normally with:
-```bash
-npm run build
-```
+### Multi-chain Support
+- Seamlessly switch between different blockchain networks
+- Maintains separate market data for each chain
+- Automatically reloads data when switching chains
 
-### 3. Vercel Deployment
-1. Connect your GitHub repository to Vercel
-2. Configure build settings:
-   - Build Command: `npm run build`
-   - Output Directory: `build`
-   - Node.js Version: 18.x
+## 🧪 Development
 
-## Monitoring and Maintenance
+### Available Scripts
 
-### 1. API Rate Limits
-The current implementation:
-- Limits to 10 markets per load
-- Includes request spacing
-- Has timeout protection
+- `npm start` - Start development server
+- `npm build` - Build for production
+- `npm test` - Run test suite
+- `npm run eject` - Eject from Create React App
 
-### 2. Performance Optimization
-- Markets are cached during the session
-- Historical data is fetched only when needed
-- Minimal API calls on refresh
+### Code Organization
 
-### 3. Future Enhancements
-- Add more chains (Ethereum, Arbitrum)
-- Implement WebSocket for real-time updates
-- Add market filtering and sorting
-- Include more detailed analytics
+- **Components**: Reusable UI components with single responsibilities
+- **Utils**: Pure functions for API calls and data processing
+- **State Management**: React hooks for local state management
+- **Styling**: Tailwind CSS utility classes
 
-## Troubleshooting
+## 🐛 Error Handling
 
-### Common Issues
+The application includes comprehensive error handling:
 
-1. **CORS Errors**: Pendle API should support CORS for browser requests
-2. **API Timeouts**: Increase timeout or implement retry logic
-3. **Missing Data**: Fallback system should handle this automatically
-4. **Build Errors**: Ensure all imports are correct
+- API connection failures
+- Invalid market data
+- Network switching errors
+- Missing historical data
+- Rate limiting protection
 
-### Debug Mode
-To enable debug logging:
+## 📱 Responsive Design
 
-```javascript
-// In pendleApi.js
-console.log('API Response:', response);
-```
+Optimized for all device sizes:
+- **Desktop**: Full dashboard with side-by-side layout
+- **Tablet**: Responsive grid layout
+- **Mobile**: Stacked components with touch-friendly controls
 
-## Support
+## 🤝 Contributing
 
-If you encounter issues:
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-1. Check the browser console for error messages
-2. Verify network connectivity
-3. Test with mock data first
-4. Check Pendle API documentation for updates
+## 📄 License
 
-## Next Steps
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-1. Deploy to Vercel and test in production
-2. Monitor API performance and errors
-3. Add additional features based on user feedback
-4. Consider adding more chains and markets
+## 🙏 Acknowledgments
 
-The implementation is production-ready and includes all necessary error handling and fallback mechanisms for a robust user experience.
+- [Pendle Finance](https://pendle.finance) for providing the API
+- [Recharts](https://recharts.org) for beautiful chart components
+- [Lucide React](https://lucide.dev) for the icon library
+- [Tailwind CSS](https://tailwindcss.com) for utility-first styling
+
+## 📞 Support
+
+For support, please open an issue in the GitHub repository or contact the development team.
+
+---
+
+**Built with ❤️ for the DeFi community**
