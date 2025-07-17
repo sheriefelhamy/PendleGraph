@@ -15,21 +15,28 @@ export const parseHistoricalData = (data, marketInfo) => {
 };
 
 export const formatCurrency = (amount) => {
-    if (amount >= 1000000) {
-        return `$${(amount / 1000000).toFixed(1)}M`;
-    } else if (amount >= 1000) {
-        return `$${(amount / 1000).toFixed(0)}K`;
+    // Add null/undefined check
+    if (amount === null || amount === undefined || isNaN(amount)) {
+        return '$0';
     }
-    return `$${amount.toFixed(0)}`;
+
+    const numAmount = Number(amount);
+
+    if (numAmount >= 1000000) {
+        return `$${(numAmount / 1000000).toFixed(1)}M`;
+    } else if (numAmount >= 1000) {
+        return `$${(numAmount / 1000).toFixed(0)}K`;
+    }
+    return `$${numAmount.toFixed(0)}`;
 };
 
 export const calculateMetrics = (markets) => {
     const totalMarkets = markets.length;
     const avgApy = markets.length > 0 ?
         (markets.reduce((sum, m) => sum + (parseFloat(m.impliedApy || 0) * 100), 0) / markets.length) : 0;
-    const totalTVL = markets.reduce((sum, m) => sum + (parseFloat(m.tvl || m.totalValueLocked || 0)), 0);
+    const totalLiquidity = markets.reduce((summ, s) => summ + parseFloat(s.liquidity || 0), 0);
 
-    return { totalMarkets, avgApy, totalTVL };
+    return { totalMarkets, avgApy, totalLiquidity };
 };
 
 export const getTrendIndicator = (chartData) => {

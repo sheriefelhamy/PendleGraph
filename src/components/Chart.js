@@ -47,9 +47,9 @@ const Chart = ({
                         </div>
                     </div>
                     <div>
-                        <span className="text-sm text-gray-500">TVL</span>
+                        <span className="text-sm text-gray-500">Liquidity</span>
                         <div className="text-lg font-semibold text-gray-900">
-                            {formatCurrency(parseFloat(selectedMarketInfo.tvl || selectedMarketInfo.totalValueLocked || 0))}
+                            {formatCurrency(parseFloat(selectedMarketInfo.liquidity || 0))}
                         </div>
                     </div>
                     <div>

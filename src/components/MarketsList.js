@@ -1,8 +1,11 @@
 // components/MarketsList.js
 import React from 'react';
 import { formatCurrency } from '../utils/dataUtils';
+import { getChainInfo } from '../utils/chainUtils';
 
-const MarketsList = ({ markets, selectedMarket, onMarketSelect }) => {
+const MarketsList = ({ markets, selectedMarket, onMarketSelect, chainId }) => {
+    const chainInfo = getChainInfo(chainId);
+
     return (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Active Markets</h2>
@@ -11,7 +14,7 @@ const MarketsList = ({ markets, selectedMarket, onMarketSelect }) => {
                     const marketId = market.address || market.id || `market-${index}`;
                     const marketName = market.name || market.symbol || market.token || `Market ${index + 1}`;
                     const currentAPY = parseFloat(market.impliedApy || 0) * 100;
-                    const tvl = parseFloat(market.tvl || market.totalValueLocked || 0);
+                    const liquidity = parseFloat(market.liquidity || 0);
                     const isSelected = selectedMarket === marketId;
 
                     return (
@@ -27,8 +30,8 @@ const MarketsList = ({ markets, selectedMarket, onMarketSelect }) => {
                                 <span className="font-medium text-gray-900 text-sm">
                                     {marketName.length > 20 ? `${marketName.slice(0, 20)}...` : marketName}
                                 </span>
-                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                    base
+                                <span className={`text-xs px-2 py-1 rounded ${chainInfo.color}`}>
+                                    {chainInfo.symbol}
                                 </span>
                             </div>
                             <div className="grid grid-cols-2 gap-4 text-sm">
@@ -37,8 +40,8 @@ const MarketsList = ({ markets, selectedMarket, onMarketSelect }) => {
                                     <div className="font-semibold text-green-600">{currentAPY.toFixed(2)}%</div>
                                 </div>
                                 <div>
-                                    <span className="text-gray-500">TVL</span>
-                                    <div className="font-semibold text-gray-900">{formatCurrency(tvl)}</div>
+                                    <span className="text-gray-500">liquidity</span>
+                                    <div className="font-semibold text-gray-900">{formatCurrency(liquidity)}</div>
                                 </div>
                             </div>
                         </div>

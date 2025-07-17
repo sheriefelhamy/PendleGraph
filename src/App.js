@@ -21,6 +21,39 @@ const PendleAPYTracker = () => {
   const [timeFrame, setTimeFrame] = useState('Last 7 Days');
   const [chainId, setChainId] = useState(8453); // Default to Base chain
 
+  // Helper function to extract liquidity from various possible field names
+  const getLiquidityValue = (data) => {
+    if (!data) return 0;
+
+    // Check common field names for liquidity
+    const possibleFields = [
+      'liquidity',
+      'totalLiquidity',
+      'tvl',
+      'totalValueLocked',
+      'volume',
+      'reserveUsd',
+      'liquidityUsd'
+    ];
+
+    for (const field of possibleFields) {
+      if (data[field] !== undefined && data[field] !== null) {
+        const value = parseFloat(data[field]);
+        if (!isNaN(value)) {
+          return value;
+        }
+      }
+    }
+
+    // Check if liquidity is nested
+    if (data.liquidity && typeof data.liquidity === 'object') {
+      if (data.liquidity.usd) return parseFloat(data.liquidity.usd);
+      if (data.liquidity.total) return parseFloat(data.liquidity.total);
+    }
+
+    return 0;
+  };
+
   // 🚀 Load initial market data
   const loadMarkets = async () => {
     setLoading(true);
@@ -30,31 +63,46 @@ const PendleAPYTracker = () => {
     try {
       // Step 1: Fetch active markets
       const activeMarkets = await fetchActiveMarkets(chainId);
+      console.log('Active markets response:', activeMarkets);
 
-      // Step 2: Enrich each market with detailed data (TVL, APY)
+      // Step 2: Enrich each market with detailed data (liquidity, APY)
       const enrichedMarkets = await Promise.all(
         activeMarkets.map(async (market) => {
           const marketAddress = market.address || market.id || market.marketAddress;
           if (!marketAddress) return market;
 
+          const name = market.name ||
+            market.tokenSymbol ||
+            `${market.syToken?.symbol || 'SY'} / ${market.ptToken?.symbol || 'PT'}`
+
           const details = await fetchMarketDetails(marketAddress, chainId);
+
+          // Enhanced debugging
+          console.log('Market details for', marketAddress, ':', details);
+          console.log('Available fields:', Object.keys(details || {}));
+
           if (details) {
+            const liquidityValue = getLiquidityValue(details);
+            console.log('Extracted liquidity value:', liquidityValue);
+
             return {
               ...market,
-              impliedApy: details.impliedApy ?? 0,
-              tvl: details.tvl ?? details.totalValueLocked ?? 0,
+              liquidity: liquidityValue,
+              impliedApy: details.impliedApy ?? market.impliedApy ?? 0,
               maturity: details.maturity ?? market.maturity ?? null,
-              name:
-                details.name ||
-                details.tokenSymbol ||
-                `${details.syToken?.symbol || 'SY'} / ${details.ptToken?.symbol || 'PT'}`,
             };
           }
 
-          return market;
+          // Fallback to original market data if details fetch fails
+          return {
+            ...market,
+            liquidity: getLiquidityValue(market), // Try to get liquidity from original data
+            impliedApy: market.impliedApy ?? 0,
+          };
         })
       );
 
+      console.log('Enriched markets:', enrichedMarkets);
       setMarkets(enrichedMarkets);
 
       // Step 3: Load initial chart data
@@ -120,7 +168,7 @@ const PendleAPYTracker = () => {
   };
 
   // Calculate dashboard metrics
-  const { totalMarkets, avgApy, totalTVL } = calculateMetrics(markets);
+  const { totalMarkets, avgApy, totalLiquidity } = calculateMetrics(markets);
   const selectedMarketInfo = markets.find(m => (m.address || m.id || `market-${markets.indexOf(m)}`) === selectedMarket);
   const trend = getTrendIndicator(chartData);
 
@@ -139,8 +187,8 @@ const PendleAPYTracker = () => {
 
         <ChainSelector chainId={chainId} onChainChange={setChainId} />
 
-        {/* Status Bar */}
-        <StatusBar error={error} loading={loading} onRefresh={loadMarkets} />
+        {/* Status Bar - Now receives chainId */}
+        <StatusBar error={error} loading={loading} onRefresh={loadMarkets} chainId={chainId} />
 
         {/* Error Alert */}
         <ErrorAlert error={error} />
@@ -149,15 +197,16 @@ const PendleAPYTracker = () => {
         <MetricsCards
           totalMarkets={totalMarkets}
           avgApy={avgApy}
-          totalTVL={totalTVL}
+          totalLiquidity={totalLiquidity}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Markets List */}
+          {/* Markets List - Now receives chainId */}
           <MarketsList
             markets={markets}
             selectedMarket={selectedMarket}
             onMarketSelect={handleMarketSelection}
+            chainId={chainId}
           />
 
           {/* Chart */}

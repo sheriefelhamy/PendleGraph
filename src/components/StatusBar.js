@@ -1,8 +1,11 @@
 // components/StatusBar.js
 import React from 'react';
 import { RefreshCw } from 'lucide-react';
+import { getChainInfo } from '../utils/chainUtils';
 
-const StatusBar = ({ error, loading, onRefresh }) => {
+const StatusBar = ({ error, loading, onRefresh, chainId }) => {
+    const chainInfo = getChainInfo(chainId);
+
     return (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
             <div className="flex items-center justify-between">
@@ -16,7 +19,7 @@ const StatusBar = ({ error, loading, onRefresh }) => {
                     </span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">Chain: Base</span>
+                    <span className="text-sm text-gray-600">Chain: {chainInfo.name}</span>
                     <button
                         onClick={onRefresh}
                         disabled={loading}
