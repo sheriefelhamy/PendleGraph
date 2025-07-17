@@ -29,7 +29,7 @@ const PendleAPYTracker = () => {
     const possibleFields = [
       'liquidity',
       'totalLiquidity',
-      'tvl',
+      'liquidity',
       'totalValueLocked',
       'volume',
       'reserveUsd',

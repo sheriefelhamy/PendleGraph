@@ -7,7 +7,7 @@ A comprehensive dashboard for tracking APY (Annual Percentage Yield) trends acro
 - **Real-time APY tracking** across all active Pendle markets
 - **Multi-chain support** (Base, Ethereum, Arbitrum, BNB Chain)
 - **Interactive charts** showing APY trends over time
-- **Market metrics** including TVL, maturity dates, and yield statistics
+- **Market metrics** including Liquidity, maturity dates, and yield statistics
 - **Responsive design** optimized for desktop and mobile
 - **Live data updates** with refresh functionality
 - **Market comparison** with sortable and filterable views
@@ -17,17 +17,17 @@ A comprehensive dashboard for tracking APY (Annual Percentage Yield) trends acro
 ### Metrics Overview
 - **Total Markets**: Number of active markets across selected chain
 - **Average APY**: Mean yield across all markets
-- **Total TVL**: Combined Total Value Locked across all markets
+- **Total Liquidity**: Combined Total Liquidity across all markets
 
 ### Market List
 - Browse all active markets with key metrics
-- Current APY and TVL for each market
+- Current APY and Liquidity for each market
 - Click to select and view detailed charts
 
 ### Interactive Charts
 - 7-day and 30-day APY trend visualization
 - Real-time trend indicators (up/down arrows)
-- Market-specific maturity and TVL information
+- Market-specific maturity and Liquidity information
 
 ## 🛠️ Tech Stack
 
@@ -107,7 +107,7 @@ This application integrates with the Pendle Finance API v2:
 
 ### Real-time Market Tracking
 - Fetches active markets from Pendle Finance API
-- Enriches market data with TVL, APY, and maturity information
+- Enriches market data with Liquidity, APY, and maturity information
 - Updates data with refresh functionality
 
 ### Historical APY Analysis
